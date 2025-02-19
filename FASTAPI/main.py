@@ -1,60 +1,31 @@
-
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 
 app= FastAPI(
-    title='Mi primer API 196', 
-    description= 'Angel Caleb Hinojosa Herrera',
-    version='1.0.1'
+    title="Angel Caleb Hinojosa Herrera",
+    description="Práctica 4",
+    version="1.1.0"
 )
 
-usuarios=[
-    {"id":1, "nombre":"Caleb", "edad":20},
-    {"id":2, "nombre":"Panadero", "edad":21},
-    {"id":3, "nombre":"Richy", "edad":21},
-    {"id":4, "nombre":"Semillo", "edad":21},
-    {"id":5, "nombre":"Emma", "edad":20}
+tareas=[
+    {"id": 1, "titulo": "Estudiar para el Examen", "descripcion": "Repasar los apuntes de TAI", "vencimiento": "14-02-24", "Estado": "Completada"},
+    {"id": 2, "titulo": "Hacer ejercicio", "descripcion": "Correr 30 minutos en el parque", "vencimiento": "15-02-24", "Estado": "Pendiente"},
+    {"id": 3, "titulo": "Terminar proyecto", "descripcion": "Finalizar el código del sistema de convocatorias", "vencimiento": "18-02-24", "Estado": "En progreso"},
+    {"id": 4, "titulo": "Llamar a mis padres", "descripcion": "Preguntarles cómo están y ponerse al día", "vencimiento": "16-02-24", "Estado": "Pendiente"},
+    {"id": 5, "titulo": "Actualizar la laptop", "descripcion": "Instalar el nuevo SSD y clonar el sistema", "vencimiento": "20-02-24", "Estado": "Pendiente"}
 ]
+
 
 @app.get('/', tags=['Inicio'])
 def main():
-    return {'Hola FASTAPI!':'AngelCaleb'}
+    return {'Hola FASTAPI!':'AngelCaleb - PROGRAMA 4'}
 
-#Endpoint para consultar todos
-@app.get('/usuarios',tags=['Operaciones CRUD'])
-def ConsultarTodos():
-    return {"Usuarios Registrados: ": usuarios}
+#ENDPOINT PARA OBTENER TODAS LAS TAREAS
+@app.get('/tareas', tags=['Obtener tareas'])
+def ObtenerTareas():
+    return {"Tus tareas son: ": tareas}
 
-#Endpoint para agregar usuarios
-@app.post('/usuarios/',tags=['Operaciones CRUD'])
-def AgregarUsuario(usuarionuevo:dict):
-    for usr in usuarios:
-        if usr["id"] == usuarionuevo.get("id"):
-            raise HTTPException(status_code= 400, details="El id usuario ya existe")
-
-    usuarios.append(usuarionuevo)
-    return usuarionuevo
-
-#Endpoint para actualizar usuarios
-@app.put('/usuarios/{usuario_id}', tags=['Operaciones CRUD'])
-def ActualizarUsuario(id:int, usuarioActualizado: dict):
-    for i, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios[i].update(usuarioActualizado)
-            return {"mensaje": "Usuario actualizado correctamente", "usuario": usuarioActualizado}
-    
-    raise HTTPException(status_code=400, detail="Usuario no encontrado")
-
-
-#Endpoint para borrar usuarios
-@app.delete('/usuarios/{usuario_id}', tags=['Operaciones CRUD'])
-def EliminarUsuario(usuario_id: int):
-    for i, usr in enumerate(usuarios):
-        if usr["id"] == usuario_id:
-            usuarioelim = usuarios.pop(i)
-            return {"mensaje": "Usuario eliminado correctamente", "usuario": usuarioelim}
-    
-    raise HTTPException(status_code=400, detail="Usuario no encontrado")
-
-    
-
+#ENDPOINT PARA VER UNA TAREA EN ESPECÍFICO
+@app.get('/tareas/{id}', tags=['ObtenerTarea'])
+def ObtenerTarea(id: int):
+    return {'Tu tarea es: ': id}
