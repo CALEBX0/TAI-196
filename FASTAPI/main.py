@@ -26,6 +26,17 @@ def ObtenerTareas():
     return {"Tus tareas son: ": tareas}
 
 #ENDPOINT PARA VER UNA TAREA EN ESPECÍFICO
-@app.get('/tareas/{id}', tags=['ObtenerTarea'])
+@app.get('/tareas/{id}', tags=['Obtener Tarea'])
 def ObtenerTarea(id: int):
     return {'Tu tarea es: ': id}
+
+#AÑADIR UNA TAREA
+@app.get('/tareas/', tags=['Añadir Tarea'])
+def AñadirTarea(newtask:dict):
+    for tarea in tareas:
+        if tarea['id'] == newtask.get ("id"):
+            
+            raise HTTPException(status_code=400, detail="Tarea ya existente")
+
+    tarea.append(newtask)
+    return newtask
