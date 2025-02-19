@@ -30,7 +30,7 @@ def ObtenerTareas():
 def ObtenerTarea(id: int):
     return {'Tu tarea es: ': id}
 
-#AÑADIR UNA TAREA
+#ENDPOINT PARA AÑADIR UNA TAREA
 @app.get('/tareas/', tags=['Añadir Tarea'])
 def AñadirTarea(newtask:dict):
     for tarea in tareas:
@@ -40,3 +40,16 @@ def AñadirTarea(newtask:dict):
 
     tarea.append(newtask)
     return newtask
+
+
+#ENDPOINT PARA ACTUALIZAR UNA TAREA
+@app.put('/tareas/{tarea_id}', tags=['Actualizar Tarea'])
+def ActualizarTarea(id:int, updatetask:dict):
+    for l, tarea in enumerate (tareas):
+        if tarea['id'] == id:
+            tareas[l].update(updatetask)
+            return {"mensaje": "Tarea correctamente", "tarea": updatetask}
+    
+    raise HTTPException(status_code=400, detail="Tarea no encontrada")
+        
+        
