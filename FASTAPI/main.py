@@ -20,6 +20,9 @@ tareas=[
 def main():
     return {'Hola FASTAPI!':'AngelCaleb - PROGRAMA 4'}
 
+
+
+
 #ENDPOINT PARA OBTENER TODAS LAS TAREAS
 @app.get('/tareas', tags=['Obtener tareas'])
 def ObtenerTareas():
@@ -30,16 +33,22 @@ def ObtenerTareas():
 def ObtenerTarea(id: int):
     return {'Tu tarea es: ': id}
 
+
+
+
 #ENDPOINT PARA AÑADIR UNA TAREA
-@app.get('/tareas/', tags=['Añadir Tarea'])
+@app.post('/tareas/', tags=['Añadir Tarea'])
 def AñadirTarea(newtask:dict):
     for tarea in tareas:
         if tarea['id'] == newtask.get ("id"):
             
             raise HTTPException(status_code=400, detail="Tarea ya existente")
 
-    tarea.append(newtask)
+    tareas.append(newtask)
     return newtask
+
+
+
 
 
 #ENDPOINT PARA ACTUALIZAR UNA TAREA
@@ -52,4 +61,14 @@ def ActualizarTarea(id:int, updatetask:dict):
     
     raise HTTPException(status_code=400, detail="Tarea no encontrada")
         
-        
+
+
+#ENDPOINT PARA BORRAR UNA TAREA
+@app.delete('/tareas/{id}', tags=['Borrar Tarea'])
+def BorrarTarea(id:int):
+    for l, tarea in enumerate(tareas):
+        if tarea['id'] == id:
+            tareas.pop(l)
+            return {"mensaje": "Tarea borrada exitosamente"}
+    
+    raise HTTPException(status_code=400, detail="Tarea no encontrada")
