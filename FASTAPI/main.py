@@ -24,15 +24,16 @@ def main():
 
 
 #ENDPOINT PARA OBTENER TODAS LAS TAREAS
-@app.get('/tareas', tags=['Obtener tareas'])
+@app.get('/tareas', tags=['Obtención de tareas'])
 def ObtenerTareas():
     return {"Tus tareas son: ": tareas}
 
 #ENDPOINT PARA VER UNA TAREA EN ESPECÍFICO
-@app.get('/tareas/{id}', tags=['Obtener Tarea'])
-def ObtenerTarea(id: int):
-    return {'Tu tarea es: ': id}
-
+@app.get('/tareas/{id}', tags=['Obtención de tareas'])
+def ObtenerSoloUnaTarea(id: int):
+    for tarea in tareas:
+        if tarea["id"] == id:
+            return {"Tarea encontrada": tarea}
 
 
 
