@@ -1,75 +1,70 @@
+
 from fastapi import FastAPI, HTTPException
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
 app= FastAPI(
-    title="Angel Caleb Hinojosa Herrera",
-    description="Práctica 4",
-    version="1.1.0"
+    title='Mi primer API 196', 
+    description= 'Angel Caleb Hinojosa Herrera',
+    version='1.0.1'
 )
 
-tareas=[
-    {"id": 1, "titulo": "Estudiar para el Examen", "descripcion": "Repasar los apuntes de TAI", "vencimiento": "14-02-24", "Estado": "Completada"},
-    {"id": 2, "titulo": "Hacer ejercicio", "descripcion": "Correr 30 minutos en el parque", "vencimiento": "15-02-24", "Estado": "Pendiente"},
-    {"id": 3, "titulo": "Terminar proyecto", "descripcion": "Finalizar el código del sistema de convocatorias", "vencimiento": "18-02-24", "Estado": "En progreso"},
-    {"id": 4, "titulo": "Llamar a mis padres", "descripcion": "Preguntarles cómo están y ponerse al día", "vencimiento": "16-02-24", "Estado": "Pendiente"},
-    {"id": 5, "titulo": "Actualizar la laptop", "descripcion": "Instalar el nuevo SSD y clonar el sistema", "vencimiento": "20-02-24", "Estado": "Pendiente"}
+#Modelo  para validación de datos
+class modelUsuario(BaseModel):
+    id: int
+    nombre: str
+    edad: int
+    correo: str
+
+
+usuarios = [
+    {"id": 1, "nombre": "Caleb", "edad": 20, "correo": "Caleb@example.com"},
+    {"id": 2, "nombre": "Panadero", "edad": 21, "correo": "Panadero@example.com"},
+    {"id": 3, "nombre": "Richy", "edad": 21, "correo": "Richy@example.com"},
+    {"id": 4, "nombre": "Semillo", "edad": 21, "correo": "Semillo@example.com"},
+    {"id": 5, "nombre": "Emma", "edad": 20, "correo": "Emma@example.com"},
 ]
 
 
 @app.get('/', tags=['Inicio'])
 def main():
-    return {'Hola FASTAPI!':'AngelCaleb - PROGRAMA 4'}
+    return {'Hola FASTAPI!':'AngelCaleb'}
 
+#Endpoint para consultar todos
+@app.get('/usuarios', response_model=List[modelUsuario], tags=['Operaciones CRUD'])
+def ConsultarTodos():
+    return usuarios
 
+#Endpoint para agregar usuarios
+@app.post('/usuarios/', response_model=modelUsuario, tags=['Operaciones CRUD'])
+def AgregarUsuario(usuarionuevo:modelUsuario):
+    for usr in usuarios:
+        if usr["id"] == usuarionuevo.id:
+            raise HTTPException(status_code= 400, details="El id usuario ya existe")
 
+    usuarios.append(usuarionuevo)
+    return usuarionuevo
 
-#ENDPOINT PARA OBTENER TODAS LAS TAREAS
-@app.get('/tareas', tags=['Obtención de tareas'])
-def ObtenerTareas():
-    return {"Tus tareas son: ": tareas}
-
-#ENDPOINT PARA VER UNA TAREA EN ESPECÍFICO
-@app.get('/tareas/{id}', tags=['Obtención de tareas'])
-def ObtenerSoloUnaTarea(id: int):
-    for tarea in tareas:
-        if tarea["id"] == id:
-            return {"Tarea encontrada": tarea}
-
-
-
-#ENDPOINT PARA AÑADIR UNA TAREA
-@app.post('/tareas/', tags=['Añadir Tarea'])
-def AñadirTarea(newtask:dict):
-    for tarea in tareas:
-        if tarea['id'] == newtask.get ("id"):
-            
-            raise HTTPException(status_code=400, detail="Tarea ya existente")
-
-    tareas.append(newtask)
-    return newtask
-
-
-
-
-
-#ENDPOINT PARA ACTUALIZAR UNA TAREA
-@app.put('/tareas/{tarea_id}', tags=['Actualizar Tarea'])
-def ActualizarTarea(id:int, updatetask:dict):
-    for l, tarea in enumerate (tareas):
-        if tarea['id'] == id:
-            tareas[l].update(updatetask)
-            return {"mensaje": "Tarea correctamente", "tarea": updatetask}
+#Endpoint para actualizar usuarios
+@app.put('/usuarios/{usuario_id}', response_model=modelUsuario, tags=['Operaciones CRUD'])
+def ActualizarUsuario(id:int, usuario_Actualizado:modelUsuario):
+    for i, usr in enumerate(usuarios):
+        if usr["id"] == id:
+            usuarios[i]= usuario_Actualizado.model_dump()
+            return usuarios[i]
     
-    raise HTTPException(status_code=400, detail="Tarea no encontrada")
-        
+    raise HTTPException(status_code=400, detail="Usuario no encontrado")
 
 
-#ENDPOINT PARA BORRAR UNA TAREA
-@app.delete('/tareas/{id}', tags=['Borrar Tarea'])
-def BorrarTarea(id:int):
-    for l, tarea in enumerate(tareas):
-        if tarea['id'] == id:
-            tareas.pop(l)
-            return {"mensaje": "Tarea borrada exitosamente"}
+#Endpoint para borrar usuarios
+@app.delete('/usuarios/{usuario_id}', tags=['Operaciones CRUD'])
+def EliminarUsuario(usuario_id: int):
+    for i, usr in enumerate(usuarios):
+        if usr["id"] == usuario_id:
+            usuarioelim = usuarios.pop(i)
+            return {"mensaje": "Usuario eliminado correctamente", "usuario": usuarioelim}
     
-    raise HTTPException(status_code=400, detail="Tarea no encontrada")
+    raise HTTPException(status_code=400, detail="Usuario no encontrado")
+
+    
+
