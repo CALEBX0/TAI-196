@@ -1,20 +1,13 @@
 
 from fastapi import FastAPI, HTTPException
 from typing import Optional, List
-from pydantic import BaseModel
+from modelsPydantic import modelUsuario
 
 app= FastAPI(
     title='Mi primer API 196', 
     description= 'Angel Caleb Hinojosa Herrera',
     version='1.0.1'
 )
-
-#Modelo  para validación de datos
-class modelUsuario(BaseModel):
-    id: int
-    nombre: str
-    edad: int
-    correo: str
 
 
 usuarios = [
@@ -40,7 +33,7 @@ def ConsultarTodos():
 def AgregarUsuario(usuarionuevo:modelUsuario):
     for usr in usuarios:
         if usr["id"] == usuarionuevo.id:
-            raise HTTPException(status_code= 400, details="El id usuario ya existe")
+            raise HTTPException(status_code= 400, detail="El id usuario ya existe")
 
     usuarios.append(usuarionuevo)
     return usuarionuevo
