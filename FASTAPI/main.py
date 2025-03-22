@@ -1,9 +1,13 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 from modelsPydantic import modelUsuario, modelAuth
 from tokenGen import createToken
+from middleware import BearerJWT
+from DB.conexion import Session, engine, Base
+from models.modelsDB import User
+
 
 app= FastAPI(
     title='Mi primer API 196', 
@@ -11,6 +15,8 @@ app= FastAPI(
     version='1.0.1'
 )
 
+#Levanta las tablas definidas en modelos
+Base.metadata.create_all(bind=engine)
 
 usuarios = [
     {"id": 1, "nombre": "Caleb", "edad": 20, "correo": "calebxo@hotmail.com"},
@@ -25,31 +31,42 @@ usuarios = [
 def main():
     return {'Hola FASTAPI!':'AngelCaleb'}
 
-
+#Endpoint apra generar token
 @app.post('/auth', tags=['Autentificación'])
 def login(autorizado:modelAuth):
-    if autorizado.correo == 'calebxo@hotmail.com' and autorizado.passw == '123456789':
+    if autorizado.email == 'calebxo@hotmail.com' and autorizado.passw == '123456789':
         token:str=createToken(autorizado.model_dump())
         print(token)
+        return JSONResponse(content=token)
         return {"Aviso": "Token Generado"}
     else:
         return {"Aviso": "Usuario no autorizado"}
 
 
 #Endpoint para consultar todos
-@app.get('/usuarios', response_model=List[modelUsuario], tags=['Operaciones CRUD'])
+@app.get('/usuarios', dependencies=[Depends(BearerJWT())], response_model=List[modelUsuario], tags=['Operaciones CRUD'])
 def ConsultarTodos():
     return usuarios
 
 #Endpoint para agregar usuarios
 @app.post('/usuarios/', response_model=modelUsuario, tags=['Operaciones CRUD'])
 def AgregarUsuario(usuarionuevo:modelUsuario):
-    for usr in usuarios:
-        if usr["id"] == usuarionuevo.id:
-            raise HTTPException(status_code= 400, detail="El id usuario ya existe")
+    db=Session()
+    try:
+        db.add(User(**usuarionuevo.model_dump()))
+        db.commit()
+        return JSONResponse(status_code=201,
+                            content={"mensaje":"Usuario Guardado", 
+                                     "usuario":usuarionuevo.model_dump() })
+    
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500,
+                            content={"mensaje":"No se guardó",
+                                     "Excepcion": str(e) })
 
-    usuarios.append(usuarionuevo)
-    return usuarionuevo
+    finally:
+        db.close()
 
 #Endpoint para actualizar usuarios
 @app.put('/usuarios/{usuario_id}', response_model=modelUsuario, tags=['Operaciones CRUD'])
